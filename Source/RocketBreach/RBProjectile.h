@@ -7,6 +7,7 @@
 class USphereComponent;
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
+class UPointLightComponent;
 
 UCLASS()
 class ROCKETBREACH_API ARBProjectile : public AActor
@@ -40,4 +41,7 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Projectile")
     float Damage = 25.0f;
+
+    UPROPERTY(VisibleAnywhere, Category = "Projectile")
+    TObjectPtr<UPointLightComponent> ProjectileLight;
 };

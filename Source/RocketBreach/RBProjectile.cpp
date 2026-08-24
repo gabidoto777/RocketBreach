@@ -1,10 +1,11 @@
 #include "RBProjectile.h"
-
+#include "Materials/MaterialInterface.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Components/PointLightComponent.h"
 
 ARBProjectile::ARBProjectile()
 {
@@ -30,6 +31,25 @@ ARBProjectile::ARBProjectile()
         ProjectileMesh->SetStaticMesh(SphereMesh.Object);
         ProjectileMesh->SetRelativeScale3D(FVector(0.35f, 0.08f, 0.08f));
     }
+
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> ProjectileMaterial(
+        TEXT("/Game/ROCKETBREACH/Weapons/Materials/M_RBProjectile.M_RBProjectile")
+    );
+
+    if (ProjectileMaterial.Succeeded())
+    {
+        ProjectileMesh->SetMaterial(0, ProjectileMaterial.Object);
+    }
+
+    ProjectileLight = CreateDefaultSubobject<UPointLightComponent>(
+        TEXT("ProjectileLight")
+    );
+
+    ProjectileLight->SetupAttachment(Collision);
+    ProjectileLight->SetIntensity(1000.0f);
+    ProjectileLight->SetAttenuationRadius(200.0f);
+    ProjectileLight->SetLightColor(FLinearColor(0.0f, 1.0f, 0.15f));
+    ProjectileLight->SetCastShadows(false);
 
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(
         TEXT("ProjectileMovement")

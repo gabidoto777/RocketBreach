@@ -2,8 +2,10 @@
 #include "RBProjectile.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
+#include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
 ARBGun::ARBGun()
@@ -26,6 +28,24 @@ ARBGun::ARBGun()
 
     MuzzlePoint = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzlePoint"));
     MuzzlePoint->SetupAttachment(GunMesh);
+
+    MuzzleFlashLight = CreateDefaultSubobject<USpotLightComponent>(
+        TEXT("MuzzleFlashLight")
+    );
+
+    MuzzleFlashLight->SetupAttachment(GunMesh, TEXT("Muzzle"));
+
+    MuzzleFlashLight->SetIntensity(5000.0f);
+    MuzzleFlashLight->SetAttenuationRadius(250.0f);
+
+    MuzzleFlashLight->SetInnerConeAngle(20.0f);
+    MuzzleFlashLight->SetOuterConeAngle(45.0f);
+
+    MuzzleFlashLight->SetLightColor(
+        FLinearColor(0.0f, 1.0f, 0.15f)
+    );
+
+    MuzzleFlashLight->SetVisibility(false);
 }
 void ARBGun::Fire(APlayerController* PlayerController)
 {
@@ -33,6 +53,18 @@ void ARBGun::Fire(APlayerController* PlayerController)
     {
         return;
     }
+
+    MuzzleFlashLight->SetVisibility(true);
+
+    GetWorldTimerManager().ClearTimer(MuzzleFlashTimer);
+
+    GetWorldTimerManager().SetTimer(
+        MuzzleFlashTimer,
+        this,
+        &ARBGun::HideMuzzleFlash,
+        0.06f,
+        false
+    );
 
     int32 ViewportX;
     int32 ViewportY;
@@ -98,4 +130,12 @@ void ARBGun::Fire(APlayerController* PlayerController)
 void ARBGun::SetEquipped(bool bEquipped)
 {
     SetActorHiddenInGame(!bEquipped);
+}
+
+void ARBGun::HideMuzzleFlash()
+{
+    if (MuzzleFlashLight)
+    {
+        MuzzleFlashLight->SetVisibility(false);
+    }
 }
