@@ -20,6 +20,7 @@ public class RocketBreach : ModuleRules
 			"UMG",
 			"Slate",
 			"SlateCore",
+            "Niagara"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

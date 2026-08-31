@@ -6,8 +6,12 @@
 
 class UInputMappingContext;
 class URBPauseMenuWidget;
-class ARBGun;
 class URBCrosshairWidget;
+class UDamageType;
+class ARBGun;
+class URBHealthWidget;
+class URBGameOverWidget;
+
 
 UCLASS()
 class ROCKETBREACH_API ARBPlayerController : public APlayerController
@@ -20,12 +24,22 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
+    virtual void PlayerTick(float DeltaTime) override;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputMappingContext* DefaultMappingContext;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputMappingContext* MouseLookMappingContext;
+
+    UFUNCTION()
+    void HandlePlayerDamage(
+        AActor* DamagedActor,
+        float Damage,
+        const UDamageType* DamageType,
+        AController* InstigatedBy,
+        AActor* DamageCauser
+    );
 
 private:
     void TogglePauseMenu();
@@ -35,6 +49,9 @@ private:
     void SpawnGun();
     void ToggleGun();
     void FireGun();
+    void StartGunInspect();
+
+    void HandlePlayerDeath();
 
     UPROPERTY()
     TObjectPtr<URBPauseMenuWidget> PauseMenuWidget;
@@ -45,5 +62,16 @@ private:
     UPROPERTY()
     TObjectPtr<URBCrosshairWidget> CrosshairWidget;
 
+    UPROPERTY()
+    TObjectPtr<URBHealthWidget> HealthWidget;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Player|Health")
+    float MaxHealth = 100.0f;
+
+    UPROPERTY()
+    TObjectPtr<URBGameOverWidget> GameOverWidget;
+
     bool bGunEquipped = false;
+    float CurrentHealth = 100.0f;
+    bool bPlayerDead = false;
 };

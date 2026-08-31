@@ -8,6 +8,7 @@ class USphereComponent;
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
 class UPointLightComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class ROCKETBREACH_API ARBProjectile : public AActor
@@ -44,4 +45,7 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category = "Projectile")
     TObjectPtr<UPointLightComponent> ProjectileLight;
+
+    UPROPERTY()
+    TObjectPtr<UNiagaraSystem> ImpactEffect;
 };

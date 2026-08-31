@@ -4,64 +4,214 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/Image.h"
+#include "Components/ScaleBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 TSharedRef<SWidget> URBMainMenuWidget::RebuildWidget()
 {
-    UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>();
+    UCanvasPanel* RootCanvas =
+        WidgetTree->ConstructWidget<UCanvasPanel>();
+
     WidgetTree->RootWidget = RootCanvas;
 
-    UVerticalBox* MenuBox = WidgetTree->ConstructWidget<UVerticalBox>();
+    // Background image
+    UTexture2D* BackgroundTexture =
+        LoadObject<UTexture2D>(
+            nullptr,
+            TEXT(
+                "/Game/ROCKETBREACH/UI/T_Title.T_Title"
+            )
+        );
 
-    UCanvasPanelSlot* MenuSlot = RootCanvas->AddChildToCanvas(MenuBox);
-    MenuSlot->SetAnchors(FAnchors(0.5f, 0.5f));
-    MenuSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-    MenuSlot->SetPosition(FVector2D::ZeroVector);
-    MenuSlot->SetAutoSize(true);
-
-    UTextBlock* TitleText = WidgetTree->ConstructWidget<UTextBlock>();
-    TitleText->SetText(FText::FromString(TEXT("ROCKET BREACH")));
-
-    FSlateFontInfo TitleFont = TitleText->GetFont();
-    TitleFont.Size = 48;
-    TitleText->SetFont(TitleFont);
-
-    if (UVerticalBoxSlot* TitleSlot = MenuBox->AddChildToVerticalBox(TitleText))
+    if (BackgroundTexture)
     {
-        TitleSlot->SetHorizontalAlignment(HAlign_Center);
-        TitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 30.0f));
+        UScaleBox* BackgroundScaleBox =
+            WidgetTree->ConstructWidget<UScaleBox>();
+
+        BackgroundScaleBox->SetStretch(
+            EStretch::ScaleToFit
+        );
+
+        BackgroundScaleBox->SetStretchDirection(
+            EStretchDirection::Both
+        );
+
+        UImage* BackgroundImage =
+            WidgetTree->ConstructWidget<UImage>();
+
+        BackgroundImage->SetBrushFromTexture(
+            BackgroundTexture,
+            true
+        );
+
+        BackgroundImage->SetVisibility(
+            ESlateVisibility::HitTestInvisible
+        );
+
+        BackgroundScaleBox->AddChild(
+            BackgroundImage
+        );
+
+        UCanvasPanelSlot* BackgroundSlot =
+            RootCanvas->AddChildToCanvas(
+                BackgroundScaleBox
+            );
+
+        BackgroundSlot->SetAnchors(
+            FAnchors(
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f
+            )
+        );
+
+        BackgroundSlot->SetOffsets(
+            FMargin(
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f
+            )
+        );
+
+        BackgroundSlot->SetZOrder(0);
     }
 
-    PlayButton = WidgetTree->ConstructWidget<UButton>();
+    // Menu buttons
+    UVerticalBox* MenuBox =
+        WidgetTree->ConstructWidget<UVerticalBox>();
 
-    UTextBlock* PlayText = WidgetTree->ConstructWidget<UTextBlock>();
-    PlayText->SetText(FText::FromString(TEXT("PLAY")));
-    PlayText->SetJustification(ETextJustify::Center);
+    UCanvasPanelSlot* MenuSlot =
+        RootCanvas->AddChildToCanvas(
+            MenuBox
+        );
 
-    PlayButton->AddChild(PlayText);
+    MenuSlot->SetAnchors(
+        FAnchors(
+            0.5f,
+            0.78f
+        )
+    );
 
-    if (UVerticalBoxSlot* PlaySlot = MenuBox->AddChildToVerticalBox(PlayButton))
+    MenuSlot->SetAlignment(
+        FVector2D(
+            0.5f,
+            0.5f
+        )
+    );
+
+    MenuSlot->SetPosition(
+        FVector2D::ZeroVector
+    );
+
+    MenuSlot->SetSize(
+        FVector2D(
+            280.0f,
+            150.0f
+        )
+    );
+
+    MenuSlot->SetZOrder(1);
+
+    // PLAY button
+    PlayButton =
+        WidgetTree->ConstructWidget<UButton>();
+
+    UTextBlock* PlayText =
+        WidgetTree->ConstructWidget<UTextBlock>();
+
+    PlayText->SetText(
+        FText::FromString(
+            TEXT("PLAY")
+        )
+    );
+
+    PlayText->SetJustification(
+        ETextJustify::Center
+    );
+
+    FSlateFontInfo PlayFont =
+        PlayText->GetFont();
+
+    PlayFont.Size = 28;
+
+    PlayText->SetFont(
+        PlayFont
+    );
+
+    PlayButton->AddChild(
+        PlayText
+    );
+
+    if (UVerticalBoxSlot* PlaySlot =
+        MenuBox->AddChildToVerticalBox(
+            PlayButton
+        ))
     {
-        PlaySlot->SetPadding(FMargin(0.0f, 5.0f));
-        PlaySlot->SetHorizontalAlignment(HAlign_Fill);
+        PlaySlot->SetPadding(
+            FMargin(
+                0.0f,
+                5.0f
+            )
+        );
+
+        PlaySlot->SetHorizontalAlignment(
+            HAlign_Fill
+        );
     }
 
-    ExitButton = WidgetTree->ConstructWidget<UButton>();
+    // EXIT button
+    ExitButton =
+        WidgetTree->ConstructWidget<UButton>();
 
-    UTextBlock* ExitText = WidgetTree->ConstructWidget<UTextBlock>();
-    ExitText->SetText(FText::FromString(TEXT("EXIT")));
-    ExitText->SetJustification(ETextJustify::Center);
+    UTextBlock* ExitText =
+        WidgetTree->ConstructWidget<UTextBlock>();
 
-    ExitButton->AddChild(ExitText);
+    ExitText->SetText(
+        FText::FromString(
+            TEXT("EXIT")
+        )
+    );
 
-    if (UVerticalBoxSlot* ExitSlot = MenuBox->AddChildToVerticalBox(ExitButton))
+    ExitText->SetJustification(
+        ETextJustify::Center
+    );
+
+    FSlateFontInfo ExitFont =
+        ExitText->GetFont();
+
+    ExitFont.Size = 28;
+
+    ExitText->SetFont(
+        ExitFont
+    );
+
+    ExitButton->AddChild(
+        ExitText
+    );
+
+    if (UVerticalBoxSlot* ExitSlot =
+        MenuBox->AddChildToVerticalBox(
+            ExitButton
+        ))
     {
-        ExitSlot->SetPadding(FMargin(0.0f, 5.0f));
-        ExitSlot->SetHorizontalAlignment(HAlign_Fill);
+        ExitSlot->SetPadding(
+            FMargin(
+                0.0f,
+                5.0f
+            )
+        );
+
+        ExitSlot->SetHorizontalAlignment(
+            HAlign_Fill
+        );
     }
 
     return Super::RebuildWidget();
@@ -92,13 +242,16 @@ void URBMainMenuWidget::HandlePlayClicked()
 {
     UGameplayStatics::OpenLevel(
         this,
-        FName(TEXT("Lvl_RocketBreach_Prototype"))
+        FName(
+            TEXT("Lvl_RocketBreach_Prototype")
+        )
     );
 }
 
 void URBMainMenuWidget::HandleExitClicked()
 {
-    if (APlayerController* PlayerController = GetOwningPlayer())
+    if (APlayerController* PlayerController =
+        GetOwningPlayer())
     {
         UKismetSystemLibrary::QuitGame(
             this,

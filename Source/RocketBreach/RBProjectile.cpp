@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PointLightComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 ARBProjectile::ARBProjectile()
 {
@@ -55,6 +57,15 @@ ARBProjectile::ARBProjectile()
         TEXT("ProjectileMovement")
     );
 
+    static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ImpactEffectAsset(
+        TEXT("/Game/ROCKETBREACH/Weapons/FX/NS_RBProjectileImpact.NS_RBProjectileImpact")
+    );
+
+    if (ImpactEffectAsset.Succeeded())
+    {
+        ImpactEffect = ImpactEffectAsset.Object;
+    }
+
     ProjectileMovement->InitialSpeed = 6000.0f;
     ProjectileMovement->MaxSpeed = 6000.0f;
     ProjectileMovement->bRotationFollowsVelocity = true;
@@ -100,6 +111,16 @@ void ARBProjectile::HandleHit(
         this,
         UDamageType::StaticClass()
     );
+
+    if (ImpactEffect)
+    {
+        UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+            GetWorld(),
+            ImpactEffect,
+            Hit.ImpactPoint,
+            Hit.ImpactNormal.Rotation()
+        );
+    }
 
     Destroy();
 }
